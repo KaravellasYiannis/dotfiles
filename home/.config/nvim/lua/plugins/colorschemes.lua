@@ -8,7 +8,7 @@ return {
             styles = {
                 bold = false,
                 italic = false,
-                transparency = true,
+                transparency = false,
             },
 
             before_highlight = function(group, highlight, palette)
@@ -17,6 +17,8 @@ return {
                         highlight.blend = nil
                     elseif group == "CursorLine" then
                         highlight.bg = palette.visual
+                    elseif group == "Function" then
+                        highlight.fg = palette.text
                     end
                 end
             end

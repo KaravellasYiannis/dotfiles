@@ -71,4 +71,5 @@ vim.lsp.enable({
     "marksman",
     "ts_ls",
     "sqls",
+    "zls",
 })

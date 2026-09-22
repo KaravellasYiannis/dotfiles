@@ -47,6 +47,7 @@ return {
             "xml",
             "yaml",
             "rust",
+            "zig",
         }
 
         -- vim.treesitter.language.register("sql", "plsql")
