@@ -4,6 +4,7 @@ require("config.statusline")
 require("config.keymaps")
 require("config.lsp")
 require("config.misc")
+require("config.cppman")
 require("config.contextpp").setup({
     enabled = false,
 })
@@ -15,7 +16,7 @@ vim.g.plsql_fold = 1
 
 vim.opt.background = "dark"
 
-vim.cmd.colorscheme("dolores-stratos")
+vim.cmd.colorscheme("dolores-kif")
 
 vim.o.winborder = "single"
 
