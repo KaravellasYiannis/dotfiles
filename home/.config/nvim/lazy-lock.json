@@ -1,4 +1,5 @@
 {
+  "atlas.nvim": { "branch": "main", "commit": "b50c0fd69db8fa5c8d41e93995e8b3db010f5e29" },
   "baleia.nvim": { "branch": "main", "commit": "710537ff5cd669c5a76c5f5b6a9169fd9b913d18" },
   "base16-nvim": { "branch": "master", "commit": "44fc7a0d7ad878f90b04ffe8fa58c99c19007509" },
   "blink-cmp-plsql.nvim": { "branch": "master", "commit": "22fcc8414f073caad9eccb71cce2627e3cfc605e" },
