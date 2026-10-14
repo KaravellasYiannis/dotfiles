@@ -11,7 +11,7 @@ end
 
 return {
     "ibhagwan/fzf-lua",
-    dependencies = { "nvim-tree/nvim-web-devicons" },
+    dependencies = { "nvim-mini/mini.icons" },
 
     keys = {
         { "<leader>ff", "<cmd>FzfLua files<cr>", desc = "Find Files" },
@@ -198,34 +198,6 @@ return {
             },
             symbols = {
                 symbol_style = 1,
-                symbol_icons = {
-                    File = "󰈙",
-                    Module = "",
-                    Namespace = "󰦮",
-                    Package = "",
-                    Class = "󰆧",
-                    Method = "󰊕",
-                    Property = "",
-                    Field = "",
-                    Constructor = "",
-                    Enum = "",
-                    Interface = "",
-                    Function = "󰊕",
-                    Variable = "󰀫",
-                    Constant = "󰏿",
-                    String = "",
-                    Number = "󰎠",
-                    Boolean = "󰨙",
-                    Array = "󱡠",
-                    Object = "",
-                    Key = "󰌋",
-                    Null = "󰟢",
-                    EnumMember = "",
-                    Struct = "󰆼",
-                    Event = "",
-                    Operator = "󰆕",
-                    TypeParameter = "󰗴",
-                },
             },
         },
         previewers = {
@@ -237,4 +209,11 @@ return {
         },
 
     },
+    config = function(_, opts)
+        opts.lsp.symbols.symbol_icons = {}
+        for _, kind in ipairs(vim.lsp.protocol.SymbolKind) do
+            opts.lsp.symbols.symbol_icons[kind] = MiniIcons.get("lsp", kind)
+        end
+        require("fzf-lua").setup(opts)
+    end,
 }
