@@ -6,6 +6,8 @@ oracle_clinet_wsl.md
 dotfiles_example/
 
 home/.config/nvim/pack/vendor/start/
+# Omarchy manages the active theme; setup.sh creates this local symlink.
+home/.config/nvim/lua/plugins/theme.lua
 misirlou.lua
 yara.lua
 [0-9]

@@ -8,6 +8,7 @@ FILES=(
   .bashrc
   .config/tmux/tmux.conf
   .config/nvim
+  .config/ghostty/config
 )
 
 for file in "${FILES[@]}"; do
@@ -18,6 +19,14 @@ for file in "${FILES[@]}"; do
 done
 
 BACKUP=""
+ensure_backup() {
+  if [[ -z "$BACKUP" ]]; then
+    mkdir -p "$HOME/.local/state"
+    BACKUP="$(mktemp -d "$HOME/.local/state/dotfiles-backup.XXXXXX")"
+    echo "Backups: $BACKUP"
+  fi
+}
+
 for file in "${FILES[@]}"; do
   source="$HOME/$file"
   target="$REPO/home/$file"
@@ -27,11 +36,7 @@ for file in "${FILES[@]}"; do
     continue
   fi
 
-  if [[ -z "$BACKUP" ]]; then
-    mkdir -p "$HOME/.local/state"
-    BACKUP="$(mktemp -d "$HOME/.local/state/dotfiles-backup.XXXXXX")"
-    echo "Backups: $BACKUP"
-  fi
+  ensure_backup
 
   mkdir -p "$BACKUP/import/$(dirname "$file")" \
     "$BACKUP/repo/$(dirname "$file")" \
@@ -54,3 +59,17 @@ for file in "${FILES[@]}"; do
   ln -s -- "$target" "$source"
   echo "Linked: $file"
 done
+
+# This generated theme must follow Omarchy, not a snapshot stored in Git.
+# Use an absolute link because the Neovim directory lives inside this repo.
+THEME="$REPO/home/.config/nvim/lua/plugins/theme.lua"
+CURRENT_THEME="$HOME/.local/state/omarchy/current/theme/neovim.lua"
+if [[ ! -L "$THEME" || "$(readlink -- "$THEME")" != "$CURRENT_THEME" ]]; then
+  if [[ -e "$THEME" || -L "$THEME" ]]; then
+    ensure_backup
+    mv -- "$THEME" "$BACKUP/nvim-theme.lua"
+  fi
+  mkdir -p "$(dirname "$THEME")"
+  ln -s -- "$CURRENT_THEME" "$THEME"
+  echo "Linked Neovim theme to Omarchy"
+fi
