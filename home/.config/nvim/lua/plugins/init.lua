@@ -2,6 +2,9 @@ return {
   {
     "NeogitOrg/neogit",
     cmd = "Neogit",
+    keys = {
+      { "<leader>gg", "<cmd>Neogit<cr>", desc = "Open Neogit" },
+    },
     dependencies = { "esmuellert/codediff.nvim", "folke/snacks.nvim" },
     opts = {
       integrations = { codediff = true, snacks = true },

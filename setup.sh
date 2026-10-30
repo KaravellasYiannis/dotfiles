@@ -8,7 +8,6 @@ FILES=(
   .bashrc
   .config/tmux/tmux.conf
   .config/nvim
-  .config/opencode
 )
 
 for file in "${FILES[@]}"; do
