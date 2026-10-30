@@ -1,18 +1,18 @@
-# shellcheck shell=bash
+# Omarchy environment (OMARCHY_PATH + PATH), needed even for non-interactive shells
+[[ -r /usr/share/omarchy/default/bash/env-bootstrap ]] && source /usr/share/omarchy/default/bash/env-bootstrap
 
-config_home="${XDG_CONFIG_HOME:-$HOME/.config}"
+# If not running interactively, don't do anything else (leave this above the rc source)
+[[ $- != *i* ]] && return
 
-[[ -r "$config_home/bash/environment" ]] && source "$config_home/bash/environment"
-[[ $- == *i* ]] || return
+# All the default Omarchy aliases and functions
+# (don't mess with these directly, just overwrite them here!)
+source "$OMARCHY_PATH/default/bash/rc"
 
-for fragment in aliases functions history; do
-	[[ -r "$config_home/bash/$fragment" ]] && source "$config_home/bash/$fragment"
-done
+# Add your own exports, aliases, and functions here.
+#
+# Make an alias for invoking commands you use constantly
+# alias p='python'
+alias vim='nvim'
+alias ll='ls -l'
+alias tmuxx='tmux attach -t karavellas || tmux new -s karavellas'
 
-[[ -r /usr/share/bash-completion/bash_completion ]] && source /usr/share/bash-completion/bash_completion
-command -v dircolors >/dev/null 2>&1 && eval "$(dircolors "$HOME/.dircolors")"
-# command -v fzf >/dev/null 2>&1 && eval "$(fzf --bash)"
-
-bind 'set completion-ignore-case on'
-
-PROMPT_COMMAND='PS1="$("$HOME/.local/bin/bashline" "$?")"'

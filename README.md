@@ -1,5 +1,17 @@
 # Dotfiles
 
+## Omarchy configs
+
+Run `./setup.sh` to import your current Bash, tmux, and Neovim configurations
+into `home/` and symlink their original locations back to this repository.
+Existing files on both sides are backed up under `~/.local/state/dotfiles-backup.*`.
+Already-linked entries are skipped on subsequent runs.
+
+Add paths relative to your home directory to the `FILES` array in `setup.sh`
+to track more files or directories. This imports your live configuration; it
+does not deploy the repository's existing configuration onto another machine.
+Use this instead of the full Stow installer below for the Omarchy-only setup.
+
 ## Install
 
 ```bash
