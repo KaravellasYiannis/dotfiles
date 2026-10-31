@@ -9,8 +9,8 @@ hl.config({
     kb_layout = "us,gr",
     kb_options = "compose:caps,shift:both_capslock_cancel,grp:alt_shift_toggle,lv3:ralt_alt",
 
-    -- Use a specific keyboard variant if needed (e.g. intl for international keyboards).
-    kb_variant = "intl",
+    -- Use standard layouts so quotes appear immediately (no US dead keys).
+    kb_variant = "",
 
     -- Change speed of keyboard repeat.
     repeat_rate = 40,

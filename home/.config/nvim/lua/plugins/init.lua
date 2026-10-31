@@ -79,4 +79,5 @@ return {
     },
   },
   { "nvim-mini/mini.pairs", enabled = false },
+  { "ej-shafran/compile-mode.nvim" },
 }
