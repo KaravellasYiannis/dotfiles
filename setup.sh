@@ -10,6 +10,7 @@ FILES=(
   .config/nvim
   .config/ghostty/config
   .config/hypr/bindings.lua
+  .config/hypr/input.lua
 )
 
 for file in "${FILES[@]}"; do
