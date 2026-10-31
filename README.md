@@ -2,7 +2,7 @@
 
 ## Omarchy configs
 
-Run `./setup.sh` to import your current Bash, tmux, and Neovim configurations
+Run `./setup.sh` to import your current Bash, tmux, Neovim, Ghostty, and Hyprland keybinding configurations
 into `home/` and symlink their original locations back to this repository.
 Existing files on both sides are backed up under `~/.local/state/dotfiles-backup.*`.
 Already-linked entries are skipped on subsequent runs.

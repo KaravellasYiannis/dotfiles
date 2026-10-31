@@ -9,6 +9,7 @@ FILES=(
   .config/tmux/tmux.conf
   .config/nvim
   .config/ghostty/config
+  .config/hypr/bindings.lua
 )
 
 for file in "${FILES[@]}"; do

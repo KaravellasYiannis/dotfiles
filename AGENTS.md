@@ -19,6 +19,7 @@ inside this repository; their normal locations point back here:
 ~/.bashrc                 -> <repo>/home/.bashrc
 ~/.config/tmux/tmux.conf   -> <repo>/home/.config/tmux/tmux.conf
 ~/.config/nvim            -> <repo>/home/.config/nvim
+~/.config/hypr/bindings.lua -> <repo>/home/.config/hypr/bindings.lua
 ```
 
 Git tracks these real files, not links pointing out to home-directory files.
@@ -98,6 +99,13 @@ necessary to avoid freezing the selected theme. Omarchy's original relative
 link is also unsuitable once the config physically lives in this repo.
 Check for similar generated files or relative-link assumptions when expanding
 the managed paths.
+
+### Hyprland keybindings
+
+Only `home/.config/hypr/bindings.lua` is managed, not the whole Hyprland directory.
+It contains personal overrides loaded after Omarchy's defaults. Preserve existing
+overrides and unbind conflicting defaults before adding replacements. After edits,
+run `hyprctl reload` followed by `hyprctl configerrors` and resolve any errors.
 
 ### Personal executables and excluded configuration
 
