@@ -32,6 +32,7 @@ return {
     },
   },
   { "akinsho/bufferline.nvim", enabled = false },
+  { "folke/flash.nvim", enabled = false },
   {
     "folke/noice.nvim",
     opts = {
@@ -80,4 +81,5 @@ return {
   },
   { "nvim-mini/mini.pairs", enabled = false },
   { "ej-shafran/compile-mode.nvim" },
+  { dir = "~/devel/dolores.nvim/", opts = { styles = { transparency = true } } },
 }
