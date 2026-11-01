@@ -8,6 +8,8 @@ path=$(tmux display-message -p -t "$pane_id" '#{b:pane_current_path}')
 case "$cmd" in
     *opencode*|*codex*|*copilot*)
         echo "[$path]";;
+    ssh)
+        echo "\@$path" ;;
     *)
         echo "$path";;
 esac
