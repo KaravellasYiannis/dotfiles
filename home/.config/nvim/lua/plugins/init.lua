@@ -80,6 +80,11 @@ return {
     },
   },
   { "nvim-mini/mini.pairs", enabled = false },
+  {
+    "kylechui/nvim-surround",
+    event = "VeryLazy",
+    opts = {},
+  },
   { "ej-shafran/compile-mode.nvim" },
   { dir = "~/devel/dolores.nvim/", opts = { styles = { transparency = true } } },
 }
