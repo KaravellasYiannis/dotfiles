@@ -53,8 +53,3 @@ o.bind("SUPER + V", "Clipboard manager", "omarchy-shell shell toggle omarchy.cli
 -- SUPER+L previously toggled the workspace layout; use it to lock the system.
 hl.unbind("SUPER + L")
 o.bind("SUPER + L", "Lock system", "omarchy system lock")
-
--- Switch layouts with AltGr + Left Shift, in either key-press order.
--- Right Alt acts as Alt via lv3:ralt_alt; Left Alt + Left Shift also works.
-o.bind("ALT + Shift_L", "Switch input language", "hyprctl switchxkblayout all next")
-o.bind("SHIFT + Alt_R", "Switch input language", "hyprctl switchxkblayout all next")

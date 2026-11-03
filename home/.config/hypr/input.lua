@@ -5,9 +5,9 @@
 -- See https://wiki.hypr.land/Configuring/Basics/Variables/#input
 hl.config({
   input = {
-    -- Switch layouts with AltGr + Left Shift (configured in bindings.lua).
+    -- Switch layouts with Left Alt + Left Shift.
     kb_layout = "us,gr",
-    kb_options = "compose:caps,shift:both_capslock_cancel,lv3:ralt_alt",
+    kb_options = "compose:caps,shift:both_capslock_cancel,lv3:ralt_alt,grp:lalt_lshift_toggle",
 
     -- Use standard layouts so quotes appear immediately (no US dead keys).
     kb_variant = "",
