@@ -11,6 +11,8 @@ FILES=(
   .config/ghostty/config
   .config/hypr/bindings.lua
   .config/hypr/input.lua
+  .config/default/hypr/monitor-workspaces.lua
+  .config/omarchy/plugins/karavellas.workspaces
 )
 
 for file in "${FILES[@]}"; do

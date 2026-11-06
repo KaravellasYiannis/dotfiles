@@ -16,6 +16,8 @@ alias vim='nvim'
 alias ll='ls -l'
 alias tmuxx='tmux attach -t karavellas || tmux new -s karavellas'
 
+EDITOR=vim
+
 # Replace Starship's prompt and pre-command timer with bashline.
 unset PROMPT_COMMAND PS0
 PROMPT_COMMAND='PS1="$("$HOME/.local/bin/bashline" "$?")"'
