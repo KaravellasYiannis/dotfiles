@@ -44,7 +44,10 @@ return {
   {
     "saghen/blink.cmp",
     opts = {
-      completion = { ghost_text = { enabled = false } },
+      completion = {
+        ghost_text = { enabled = false },
+        list = { selection = { preselect = false } },
+      },
     },
   },
   {
@@ -80,6 +83,18 @@ return {
     },
   },
   { "nvim-mini/mini.pairs", enabled = false },
+  { "folke/todo-comments.nvim", enabled = false },
+  {
+    "nvim-mini/mini.hipatterns",
+    opts = {
+      highlighters = {
+        fixme = { pattern = "%f[%w]()FIXME()%f[%W]", group = "MiniHipatternsFixme" },
+        hack = { pattern = "%f[%w]()HACK()%f[%W]", group = "MiniHipatternsHack" },
+        todo = { pattern = "%f[%w]()TODO()%f[%W]", group = "MiniHipatternsFixme" },
+        note = { pattern = "%f[%w]()NOTE()%f[%W]", group = "MiniHipatternsNote" },
+      },
+    },
+  },
   {
     "kylechui/nvim-surround",
     event = "VeryLazy",
