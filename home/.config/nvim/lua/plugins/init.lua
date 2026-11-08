@@ -14,7 +14,10 @@ return {
   },
   {
     "folke/snacks.nvim",
-    opts = { explorer = { enabled = false } },
+    opts = {
+      explorer = { enabled = false },
+      dashboard = { enabled = false },
+    },
     keys = {
       { "<leader>e", false },
       { "<leader>E", false },
@@ -26,7 +29,9 @@ return {
     "stevearc/oil.nvim",
     lazy = false,
     dependencies = { "nvim-mini/mini.icons" },
-    opts = {},
+    opts = {
+      view_options = { show_hidden = true },
+    },
     keys = {
       { "<leader>e", "<cmd>Oil<cr>", desc = "Explorer Oil (File Directory)" },
     },
@@ -77,6 +82,10 @@ return {
     "esmuellert/codediff.nvim",
     cmd = "CodeDiff",
     opts = {
+      explorer = {
+        view_mode = "tree",
+        line_stats = { enabled = true },
+      },
       keymaps = {
         view = { next_hunk = "]c", prev_hunk = "[c" },
       },
