@@ -11,26 +11,17 @@ vim.opt.softtabstop = 4
 
 vim.opt.listchars = "tab:> ,trail:·,space:·"
 
--- Reuse LazyVim's Snacks Zen mode so the previous UI state is restored on exit.
+-- Toggle editor chrome.
+vim.g.focus_mode = false
 vim.api.nvim_create_user_command("ToggleFocus", function()
-  Snacks.zen({
-    center = false,
-    toggles = { indent = false },
-    show = { statusline = false, tabline = false },
-    win = {
-      width = 0,
-      backdrop = false,
-      wo = {
-        number = false,
-        relativenumber = false,
-        signcolumn = "no",
-        statuscolumn = "",
-        foldcolumn = "0",
-        list = false,
-        colorcolumn = "",
-        cursorline = false,
-        winbar = "",
-      },
-    },
-  })
-end, { desc = "Toggle a distraction-free LazyVim view" })
+  vim.g.focus_mode = not vim.g.focus_mode
+  local focus = vim.g.focus_mode
+  vim.opt.laststatus = focus and 0 or 3
+  vim.opt.showtabline = focus and 0 or 2
+  vim.opt.number = not focus
+  vim.opt.signcolumn = focus and "no" or "yes"
+  vim.opt.list = not focus
+  vim.opt.cursorline = not focus
+  vim.g.snacks_indent = not focus
+  vim.lsp.inlay_hint.enable(not focus)
+end, { desc = "Toggle distraction-free UI" })

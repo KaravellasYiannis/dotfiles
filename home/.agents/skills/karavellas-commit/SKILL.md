@@ -10,7 +10,7 @@ Do not ask for routine approval of the selected changes or commit message.
 Never push, **only** when requested alongside this skill.
 Do not invoke this workflow merely because you created or edited the skill.
 Never invoke the skill because is seems logical too, this skill should be invoked
-by the user.
+by the user. You might want to split the changes to multiple commits if it makes sense
 
 ## Select the changes
 
@@ -62,6 +62,8 @@ feat(scope): brief title
 - Do not claim checks passed unless they actually ran successfully.
 - Don't mention any ran test or unnecessary information in the commit message
 - Your brief details on the commit message, should actually be brief
+- Don't force a second point, in many cases just one point is enough.
+- Be VERY brief in each one of your points.
 
 ## Commit and report
 
