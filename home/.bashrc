@@ -20,5 +20,5 @@ EDITOR=nvim
 
 # Replace Starship's prompt and pre-command timer with bashline.
 unset PROMPT_COMMAND PS0
-PROMPT_COMMAND='PS1="$("$HOME/.local/bin/bashline" "$?")"'
+PROMPT_COMMAND='PS1="$("$HOME/.local/bin/bashline" "$?")"; history -a; history -n'
 PS2='> '
