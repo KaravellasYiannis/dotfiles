@@ -62,6 +62,42 @@ end
 
 local attaching = false
 local wait_for_workspace = [[
+  -- shortcut: Neovim 0.12 can keep stale multigrid cells after detach. Remove this
+  -- temporary single-grid UI once Neovim resends a full grid on reattach.
+  local function reset_grid(width, height)
+    local pipe = vim.uv.new_pipe(false)
+    local unpack = vim.mpack.Unpacker()
+    local detached = false
+    local address = arg[1]
+    if vim.fn.has("win32") == 1 then
+      address = address:gsub("/", "\\")
+    end
+
+    pipe:connect(address, function(err)
+      assert(not err, err)
+      pipe:read_start(function(read_error, data)
+        assert(not read_error, read_error)
+        if not data then return end
+        local offset = 1
+        while offset <= #data do
+          local message
+          message, offset = unpack(data, offset)
+          if message and message[1] == 1 then
+            assert(message[3] == vim.NIL, vim.inspect(message))
+            if message[2] == 1 then
+              pipe:write(vim.mpack.encode({ 0, 2, "nvim_ui_detach", {} }))
+            else
+              detached = true
+            end
+          end
+        end
+      end)
+      pipe:write(vim.mpack.encode({ 0, 1, "nvim_ui_attach", { width, height, { ext_linegrid = true } } }))
+    end)
+    assert(vim.wait(1500, function() return detached end))
+    pipe:close()
+  end
+
   local channel
   local readiness = arg[3] == "managed" and "get(g:, 'local_workspace_ready', 0)" or "1"
   assert(vim.wait(8000, function()
@@ -79,6 +115,12 @@ local wait_for_workspace = [[
     end
     return vim.rpcrequest(channel, "nvim_eval", readiness) == 1
   end, 100))
+  if arg[4] == "multigrid" then
+    local size = vim.rpcrequest(channel, "nvim_eval", "get(g:, 'neovide', 0) && empty(nvim_list_uis()) ? [&columns, &lines] : []")
+    if #size > 0 then
+      reset_grid(size[1], size[2])
+    end
+  end
   vim.rpcrequest(channel, "nvim_set_var", "local_workspace_previous", arg[2])
 ]]
 
@@ -118,9 +160,12 @@ local function attach(target)
   end
 
   local source = vim.v.servername ~= "" and vim.v.servername or vim.fn.serverstart()
+  local multigrid = vim.tbl_contains(vim.api.nvim_list_uis(), function(ui)
+    return ui.ext_multigrid
+  end, { predicate = true })
   local probe = vim.system({
     vim.v.progpath, "--headless", "-u", "NONE", "-i", "NONE",
-    "-l", "-", target.address, source, target.path and "managed" or "previous",
+    "-l", "-", target.address, source, target.path and "managed" or "previous", multigrid and "multigrid" or "single-grid",
   }, { stdin = wait_for_workspace }, vim.schedule_wrap(function(result)
     attaching = false
     if #vim.api.nvim_list_uis() == 0 then
