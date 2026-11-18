@@ -211,7 +211,65 @@ local function attach(target)
   end, 8000)
 end
 
-local function pick()
+-- :qall can close these buffer types even when they are marked modified.
+local dirty_buffers = [[len(filter(getbufinfo({'bufmodified': 1}), ]]
+  .. [[{_, buf -> index(['nofile', 'nowrite', 'terminal'], getbufvar(buf.bufnr, '&buftype')) == -1}))]]
+
+local function stop_error(target)
+  local status = remote_eval(target.address, "get(g:, 'local_workspace_ready', 0) == 1 ? " .. dirty_buffers .. " : -1")
+  local modified = tonumber(status)
+  if not modified or modified < 0 then
+    return "Could not verify workspace " .. target.path
+  end
+  if modified > 0 then
+    return "Save changes in workspace " .. target.path .. " before stopping it"
+  end
+end
+
+local function request_quit(address)
+  local ok, channel = pcall(vim.fn.sockconnect, "pipe", address, { rpc = true })
+  if ok and channel > 0 then
+    vim.rpcnotify(channel, "nvim_command", "qall")
+    vim.fn.chanclose(channel)
+  end
+end
+
+local function stop_workspace(picker, item)
+  if not item then
+    return
+  end
+  local target = item.target
+  if is_current(target.address) then
+    picker:close()
+    vim.cmd.qall()
+    return
+  end
+  if not listening(target.address) then
+    picker:find()
+    vim.notify("Workspace is already stopped: " .. target.path)
+    return
+  end
+  local err = stop_error(target)
+  if err then
+    vim.notify(err, vim.log.levels.WARN)
+    return
+  end
+
+  request_quit(target.address)
+  local deadline = uv.hrtime() + 3e9
+  local function refresh_when_stopped()
+    if not listening(target.address) then
+      picker:find()
+    elseif uv.hrtime() < deadline then
+      vim.defer_fn(refresh_when_stopped, 50)
+    else
+      vim.notify("Could not stop workspace " .. target.path, vim.log.levels.WARN)
+    end
+  end
+  refresh_when_stopped()
+end
+
+local function workspace_items()
   local items, seen = {}, {}
   local function add(path, live_only)
     path = directory(path)
@@ -253,14 +311,24 @@ local function pick()
       end
     end
   end
+  return items
+end
 
+local function pick()
   Snacks.picker.pick({
     title = "Workspaces",
-    items = items,
+    finder = workspace_items,
     layout = { preset = "select" },
+    actions = { stop_workspace = { action = stop_workspace, desc = "Stop workspace" } },
+    win = {
+      input = { keys = { ["<C-x>"] = { "stop_workspace", mode = { "i", "n" } } } },
+      list = { keys = { ["<C-x>"] = "stop_workspace" } },
+    },
     format = function(item)
+      local current = is_current(item.target.address)
+      local color = current and "DiagnosticInfo" or (item.live and "DiagnosticOk" or "Comment")
       return {
-        { item.live and "● " or "○ ", item.live and "DiagnosticOk" or "Comment" },
+        { (current or item.live) and "● " or "○ ", color },
         { vim.fn.fnamemodify(item.text, ":~") },
       }
     end,
@@ -272,10 +340,6 @@ local function pick()
     end,
   })
 end
-
--- :qall can close these buffer types even when they are marked modified.
-local dirty_buffers = [[len(filter(getbufinfo({'bufmodified': 1}), ]]
-  .. [[{_, buf -> index(['nofile', 'nowrite', 'terminal'], getbufvar(buf.bufnr, '&buftype')) == -1}))]]
 
 local function force_quit(address)
   -- Fast RPC can acknowledge a hit-enter prompt even while normal RPC is blocked.
@@ -302,13 +366,9 @@ local function stop_all(force)
   for _, target in ipairs(registered_workspaces()) do
     if not is_current(target.address) and listening(target.address) then
       if not force then
-        local status = remote_eval(target.address, "get(g:, 'local_workspace_ready', 0) == 1 ? " .. dirty_buffers .. " : -1")
-        local modified = tonumber(status)
-        if not modified or modified < 0 then
-          error("Could not verify workspace " .. target.path, 0)
-        end
-        if modified > 0 then
-          error("Save changes in workspace " .. target.path .. " before stopping workspaces", 0)
+        local err = stop_error(target)
+        if err then
+          error(err, 0)
         end
       end
       peers[#peers + 1] = target
@@ -319,11 +379,7 @@ local function stop_all(force)
     if force then
       force_quit(target.address)
     else
-      local ok, channel = pcall(vim.fn.sockconnect, "pipe", target.address, { rpc = true })
-      if ok and channel > 0 then
-        vim.rpcnotify(channel, "nvim_command", "qall")
-        vim.fn.chanclose(channel)
-      end
+      request_quit(target.address)
     end
   end
 
