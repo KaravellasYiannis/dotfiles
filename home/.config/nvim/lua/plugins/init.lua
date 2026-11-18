@@ -140,11 +140,14 @@ return {
       -- { "fg", function() require('fff').live_grep() end, desc = 'LiFFFe grep' },
     },
     opts = {
-      layout = { prompt_position = 'top' },
+      prompt = vim.fn.fnamemodify(vim.fn.getcwd(), ':~') .. '/',
+      layout = { prompt_position = 'top', show_path_first = true },
       file_picker = { fuzzy_query_highlighting = false },
       keymaps = {
         clear_query = '<C-u>',
         preview_scroll_up = '<C-b>',
+        cycle_previous_query = '<C-p>',
+        cycle_forward_query = '<C-n>',
       },
       mappings = {
         n = {
