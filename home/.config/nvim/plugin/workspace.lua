@@ -61,18 +61,28 @@ local function remote_eval(address, expression)
 end
 
 local attaching = false
+local wait_for_workspace = [[
+  local channel
+  local readiness = arg[3] == "managed" and "get(g:, 'local_workspace_ready', 0)" or "1"
+  assert(vim.wait(8000, function()
+    if not channel then
+      local ok, id = pcall(vim.fn.sockconnect, "pipe", arg[1], { rpc = true })
+      if not ok or id <= 0 then
+        return false
+      end
+      channel = id
+    end
+    -- A detached server can be waiting for Enter before it handles normal RPC.
+    local mode = vim.rpcrequest(channel, "nvim_get_mode")
+    if mode.blocking and mode.mode == "r" then
+      vim.rpcnotify(channel, "nvim_input", "<CR>")
+    end
+    return vim.rpcrequest(channel, "nvim_eval", readiness) == 1
+  end, 100))
+  vim.rpcrequest(channel, "nvim_set_var", "local_workspace_previous", arg[2])
+]]
 
-local function ready(address)
-  return listening(address) and remote_eval(address, "get(g:, 'local_workspace_ready', 0)") == "1"
-end
-
-local function attach(target)
-  if is_current(target.address) then
-    return
-  end
-  if attaching then
-    error("A workspace is already starting", 0)
-  end
+local function start_workspace(target)
   if not windows then
     uv.fs_mkdir(socket_dir, 448)
     local stat = uv.fs_lstat(socket_dir)
@@ -91,19 +101,49 @@ local function attach(target)
       error("Could not start Neovim for " .. target.path, 0)
     end
   end
+end
 
-  attaching = true
-  local responded = vim.wait(8000, function()
-    return ready(target.address)
-  end, 100)
-  attaching = false
-  if not responded then
-    error("Workspace did not respond at " .. target.path, 0)
+local function attach(target)
+  if is_current(target.address) then
+    return
+  end
+  if attaching then
+    error("A workspace switch is already in progress", 0)
+  end
+  if target.path then
+    start_workspace(target)
+  elseif not listening(target.address) then
+    vim.notify("The previous workspace is no longer running", vim.log.levels.INFO)
+    return
   end
 
-  vim.fn.mkdir(registry, "p", 448)
-  vim.fn.writefile({ vim.json.encode(target.path) }, vim.fs.joinpath(registry, target.id .. ".json"))
-  vim.cmd.connect({ args = { target.address }, magic = { file = false, bar = false } })
+  local source = vim.v.servername ~= "" and vim.v.servername or vim.fn.serverstart()
+  local probe = vim.system({
+    vim.v.progpath, "--headless", "-u", "NONE", "-i", "NONE",
+    "-l", "-", target.address, source, target.path and "managed" or "previous",
+  }, { stdin = wait_for_workspace }, vim.schedule_wrap(function(result)
+    attaching = false
+    if #vim.api.nvim_list_uis() == 0 then
+      return
+    end
+    if result.code ~= 0 or result.signal ~= 0 then
+      vim.notify("Workspace did not respond at " .. (target.path or target.address), vim.log.levels.ERROR)
+      return
+    end
+
+    if target.path then
+      vim.fn.mkdir(registry, "p", 448)
+      vim.fn.writefile({ vim.json.encode(target.path) }, vim.fs.joinpath(registry, target.id .. ".json"))
+    end
+    vim.cmd.connect({ args = { target.address }, magic = { file = false, bar = false } })
+  end))
+  attaching = true
+  -- The probe can still be inside an RPC request when the deadline expires.
+  vim.defer_fn(function()
+    if not probe:is_closing() then
+      probe:kill("sigkill")
+    end
+  end, 8000)
 end
 
 local function pick()
@@ -120,7 +160,7 @@ local function pick()
     local live = live_only and listening(target.address)
     if not live_only or live then
       seen[target.id] = true
-      items[#items + 1] = { text = (live and "[live] " or "") .. path, target = target }
+      items[#items + 1] = { text = path, target = target, live = live }
     end
   end
 
@@ -152,7 +192,12 @@ local function pick()
     title = "Workspaces",
     items = items,
     layout = { preset = "select" },
-    format = "text",
+    format = function(item)
+      return {
+        { item.live and "● " or "○ ", item.live and "DiagnosticOk" or "Comment" },
+        { vim.fn.fnamemodify(item.text, ":~") },
+      }
+    end,
     confirm = function(picker, item)
       picker:close()
       if item then
@@ -245,6 +290,16 @@ vim.api.nvim_create_user_command("Workspace", function(opts)
     attach(workspace(path))
   end
 end, { nargs = "?", complete = "dir", desc = "Switch to a local workspace" })
+
+vim.keymap.set({ "n", "t" }, "<C-b>f", "<Cmd>Workspace<CR>", { desc = "Find workspace" })
+vim.keymap.set({ "n", "t" }, "<C-b>l", function()
+  local address = vim.g.local_workspace_previous
+  if not address or address == "" then
+    vim.notify("No previous workspace", vim.log.levels.INFO)
+    return
+  end
+  attach({ address = address })
+end, { desc = "Switch to previous workspace" })
 
 vim.api.nvim_create_user_command("WorkspaceStopAll", function(opts)
   stop_all(opts.bang)
