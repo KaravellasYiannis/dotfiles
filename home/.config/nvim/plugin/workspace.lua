@@ -1,7 +1,9 @@
+-- Each project keeps its own editor and jobs alive while the UI switches servers.
 local uv = vim.uv
 local windows = vim.fn.has("win32") == 1
 local state = vim.fn.stdpath("state")
 local registry = vim.fs.joinpath(state, "workspaces")
+-- Hash the profile and project paths to keep socket addresses short and distinct.
 local namespace = vim.fn.sha256(windows and state:lower() or state):sub(1, 16)
 local socket_dir = vim.fs.joinpath(vim.env.XDG_RUNTIME_DIR or "/tmp", "nvim-ws-" .. namespace)
 
@@ -61,6 +63,7 @@ local function remote_eval(address, expression)
 end
 
 local attaching = false
+-- Run readiness checks in a separate process so a busy server cannot stall the UI.
 local wait_for_workspace = [[
   -- shortcut: Neovim 0.12 can keep stale multigrid cells after detach. Remove this
   -- temporary single-grid UI once Neovim resends a full grid on reattach.
@@ -95,6 +98,7 @@ local wait_for_workspace = [[
         while offset <= #data do
           local message
           message, offset = unpack(data, offset)
+          -- Advance only on RPC replies and discard the temporary UI's redraw events.
           if message and message[1] == 1 then
             assert(message[3] == vim.NIL, vim.inspect(message))
             if message[2] == 1 then
@@ -136,6 +140,7 @@ local wait_for_workspace = [[
       reset_grid(size[1], size[2])
     end
   end
+  -- Store the return address on the destination so repeated toggles work both ways.
   vim.rpcrequest(channel, "nvim_set_var", "local_workspace_previous", arg[2])
 ]]
 
@@ -230,6 +235,7 @@ local function pick()
 
   add(vim.fn.getcwd())
   local roots = vim.fs.joinpath(vim.fn.stdpath("config"), "workspace-roots")
+  -- Reuse allmux's project roots when no Neovim roots file is configured.
   if not windows and vim.fn.filereadable(roots) == 0 then
     roots = vim.fs.joinpath(vim.env.XDG_CONFIG_HOME or "~/.config", ".allmux")
     roots = vim.fn.fnamemodify(roots, ":p")
