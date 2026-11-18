@@ -15,12 +15,12 @@ return {
   {
     "folke/snacks.nvim",
     opts = {
-      explorer = { enabled = false },
+      explorer = { enabled = true },
       dashboard = { enabled = false },
     },
     keys = {
       { "<leader>e", false },
-      { "<leader>E", false },
+      { "<leader>E", function() Snacks.explorer() end, desc = "Explorer Snacks (cwd)" },
       { "<leader>fe", false },
       { "<leader>fE", false },
     },
