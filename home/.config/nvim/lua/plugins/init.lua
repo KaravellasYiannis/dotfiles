@@ -18,6 +18,19 @@ return {
       explorer = { enabled = true },
       dashboard = { enabled = false },
       picker = {
+        sources = {
+          grep = {
+            layout = {
+              preset = "vertical",
+              reverse = true,
+              layout = {
+                { win = "preview", title = "{preview}", height = 0.4, border = "bottom" },
+                { win = "list", border = "none" },
+                { win = "input", height = 1, border = "top" },
+              },
+            },
+          },
+        },
         actions = {
           clear_query = function(picker) picker.input:set("", "") end,
         },

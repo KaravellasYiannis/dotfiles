@@ -2,6 +2,7 @@
 require("config.remote_clipboard").setup()
 
 vim.opt.relativenumber = false
+vim.opt.cursorlineopt = "number"
 vim.g.autoformat = false
 
 vim.opt.expandtab = true
