@@ -118,7 +118,7 @@ local wait_for_workspace = [[
   end
 
   local channel
-  local readiness = arg[3] == "managed" and "get(g:, 'local_workspace_ready', 0)" or "1"
+  local readiness = arg[3] ~= "" and "get(g:, 'local_workspace_ready', 0)" or "1"
   assert(vim.wait(8000, function()
     if not channel then
       local ok, id = pcall(vim.fn.sockconnect, "pipe", arg[1], { rpc = true })
@@ -140,8 +140,23 @@ local wait_for_workspace = [[
       reset_grid(size[1], size[2])
     end
   end
-  -- Store the return address on the destination so repeated toggles work both ways.
-  vim.rpcrequest(channel, "nvim_set_var", "local_workspace_previous", arg[2])
+  vim.rpcrequest(channel, "nvim_exec_lua", [=[
+    local source, path = ...
+    -- Store the return address on the destination so repeated toggles work both ways.
+    vim.g.local_workspace_previous = source
+    local root = path ~= "" and path or vim.g.local_workspace_path or vim.fn.getcwd(-1, -1)
+    vim.g.local_workspace_path = root
+    local name = vim.fs.basename(root)
+
+    -- The reset UI is already gone. Show the message when the real UI arrives.
+    vim.api.nvim_create_autocmd("UIEnter", {
+      group = vim.api.nvim_create_augroup("WorkspaceNotification", { clear = true }),
+      once = true,
+      callback = vim.schedule_wrap(function()
+        vim.notify("Switched to " .. (name ~= "" and name or root))
+      end),
+    })
+  ]=], { arg[2], arg[3] })
 ]]
 
 local function start_workspace(target)
@@ -185,7 +200,7 @@ local function attach(target)
   end, { predicate = true })
   local probe = vim.system({
     vim.v.progpath, "--headless", "-u", "NONE", "-i", "NONE",
-    "-l", "-", target.address, source, target.path and "managed" or "previous", multigrid and "multigrid" or "single-grid",
+    "-l", "-", target.address, source, target.path or "", multigrid and "multigrid" or "single-grid",
   }, { stdin = wait_for_workspace }, vim.schedule_wrap(function(result)
     attaching = false
     if #vim.api.nvim_list_uis() == 0 then
