@@ -64,6 +64,19 @@ local attaching = false
 local wait_for_workspace = [[
   -- shortcut: Neovim 0.12 can keep stale multigrid cells after detach. Remove this
   -- temporary single-grid UI once Neovim resends a full grid on reattach.
+  local refresh_tabs = [=[
+    local current = vim.api.nvim_get_current_tabpage()
+    -- Refresh hidden grids without firing TabEnter or changing the alternate tab.
+    for _, tab in ipairs(vim.api.nvim_list_tabpages()) do
+      if tab ~= current then
+        vim.api.nvim_win_call(vim.api.nvim_tabpage_get_win(tab), function()
+          vim.cmd.redraw({ bang = true })
+        end)
+      end
+    end
+    vim.cmd.redraw({ bang = true })
+  ]=]
+
   local function reset_grid(width, height)
     local pipe = vim.uv.new_pipe(false)
     local unpack = vim.mpack.Unpacker()
@@ -85,7 +98,9 @@ local wait_for_workspace = [[
           if message and message[1] == 1 then
             assert(message[3] == vim.NIL, vim.inspect(message))
             if message[2] == 1 then
-              pipe:write(vim.mpack.encode({ 0, 2, "nvim_ui_detach", {} }))
+              pipe:write(vim.mpack.encode({ 0, 2, "nvim_exec_lua", { refresh_tabs, {} } }))
+            elseif message[2] == 2 then
+              pipe:write(vim.mpack.encode({ 0, 3, "nvim_ui_detach", {} }))
             else
               detached = true
             end
@@ -94,7 +109,7 @@ local wait_for_workspace = [[
       end)
       pipe:write(vim.mpack.encode({ 0, 1, "nvim_ui_attach", { width, height, { ext_linegrid = true } } }))
     end)
-    assert(vim.wait(1500, function() return detached end))
+    assert(vim.wait(8000, function() return detached end))
     pipe:close()
   end
 
