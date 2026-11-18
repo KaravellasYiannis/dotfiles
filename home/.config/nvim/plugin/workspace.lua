@@ -337,7 +337,7 @@ vim.api.nvim_create_user_command("Workspace", function(opts)
 end, { nargs = "?", complete = "dir", desc = "Switch to a local workspace" })
 
 vim.keymap.set({ "n", "t" }, "<C-b>f", "<Cmd>Workspace<CR>", { desc = "Find workspace" })
-vim.keymap.set({ "n", "t" }, "<C-b>l", function()
+vim.keymap.set({ "n", "t" }, "<C-b>L", function()
   local address = vim.g.local_workspace_previous
   if not address or address == "" then
     vim.notify("No previous workspace", vim.log.levels.INFO)
