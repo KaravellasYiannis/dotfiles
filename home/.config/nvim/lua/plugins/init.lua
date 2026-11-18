@@ -111,5 +111,5 @@ return {
     opts = {},
   },
   { "ej-shafran/compile-mode.nvim" },
-  { dir = "~/devel/dolores.nvim/", opts = { styles = { transparency = true } } },
+  { dir = "~/devel/dolores.nvim/" },
 }
