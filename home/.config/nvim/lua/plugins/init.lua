@@ -17,8 +17,25 @@ return {
     opts = {
       explorer = { enabled = true },
       dashboard = { enabled = false },
+      picker = {
+        actions = {
+          clear_query = function(picker) picker.input:set("", "") end,
+        },
+        win = {
+          input = {
+            keys = {
+              ["<c-u>"] = {
+                "clear_query",
+                mode = { "i", "n" },
+                desc = "Clear query",
+              },
+            },
+          },
+        },
+      },
     },
     keys = {
+      { "<leader><space>", false },
       { "<leader>e", false },
       { "<leader>E", function() Snacks.explorer() end, desc = "Explorer Snacks (cwd)" },
       { "<leader>fe", false },
@@ -112,4 +129,28 @@ return {
   },
   { "ej-shafran/compile-mode.nvim" },
   { dir = "~/devel/dolores.nvim/" },
+  {
+    'dmtrKovalenko/fff',
+    build = function()
+      -- downloads a prebuilt binary or falls back to cargo build
+      require("fff.download").download_or_build_binary()
+    end,
+    keys = {
+      { "<leader><leader>", function() require('fff').find_files() end, desc = 'FFFind files' },
+      -- { "fg", function() require('fff').live_grep() end, desc = 'LiFFFe grep' },
+    },
+    opts = {
+      layout = { prompt_position = 'top' },
+      file_picker = { fuzzy_query_highlighting = false },
+      keymaps = {
+        clear_query = '<C-u>',
+        preview_scroll_up = '<C-b>',
+      },
+      mappings = {
+        n = {
+          ['<C-u>'] = function() require('fff.picker_ui.picker_ui').clear_query() end,
+        },
+      },
+    },
+  }
 }
