@@ -142,3 +142,4 @@ or Git unless explicitly requested.
 - After theme changes, a headless Neovim check can inspect `vim.g.colors_name`;
   avoid broad plugin updates or cleanup just to validate a small config change.
 - Do not commit or push unless requested.
+
