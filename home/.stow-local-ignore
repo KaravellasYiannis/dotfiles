@@ -1,0 +1,11 @@
+# Repo metadata and editor backups
+\.git
+\.gitignore
+.*~
+.*\.bak(\..*)?
+.*\.backup(\..*)?
+
+# Keep documentation, licenses, and machine-local Neovim state in the repo.
+README\.md
+LICENSE
+^/\.config/nvim/pack/vendor/start(/|$)

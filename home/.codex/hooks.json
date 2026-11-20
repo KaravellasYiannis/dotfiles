@@ -2,15 +2,6 @@
   "hooks": {
     "SessionStart": [
       {
-        "hooks": [
-          {
-            "command": "bash '/home/karavellas/.codex/herdr-agent-state.sh' session",
-            "timeout": 10,
-            "type": "command"
-          }
-        ]
-      },
-      {
         "matcher": "^(startup|resume|clear|fork)$",
         "hooks": [{ "type": "command", "command": "\"$HOME/.local/bin/aimux\" set idle", "timeout": 2 }]
       }

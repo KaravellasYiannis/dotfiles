@@ -10,7 +10,6 @@
     "verbosity": "high"
   },
   "plugins": [
-    "/home/karavellas/.config/opencode/herdr-opencode",
     "./aimux-opencode"
   ],
   "tabs": {
