@@ -70,7 +70,7 @@ return {
   {
     "stevearc/oil.nvim",
     lazy = false,
-    dependencies = { "nvim-mini/mini.icons" },
+    dependencies = { "nvim-tree/nvim-web-devicons" },
     opts = {
       view_options = { show_hidden = true },
     },
@@ -78,6 +78,8 @@ return {
       { "<leader>e", "<cmd>Oil<cr>", desc = "Explorer Oil (File Directory)" },
     },
   },
+  { "nvim-mini/mini.icons", enabled = false },
+  { "nvim-tree/nvim-web-devicons", lazy = true, opts = {} },
   { "akinsho/bufferline.nvim", enabled = false },
   { "folke/flash.nvim", enabled = false },
   {

@@ -54,8 +54,8 @@ vim.api.nvim_create_autocmd({ "UIEnter", "UILeave" }, {
       update_title_background()
     end
 
-    if attached and vim.o.guifont == "" then
-      vim.o.guifont = vim.fn.has("win32") == 1 and "CaskaydiaCove NF:h14" or "monospace:h14"
+    if attached and (vim.o.guifont == "" or (windows and vim.o.guifont:match("^Cascadia Code,Cascadia Mono,"))) then
+      vim.o.guifont = windows and "CaskaydiaCove NFM:h14" or "monospace:h14"
     end
     for _, binding in ipairs(bindings) do
       if attached then
