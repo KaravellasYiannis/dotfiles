@@ -1,5 +1,6 @@
 -- Options are automatically loaded before lazy.nvim startup.
 require("config.remote_clipboard").setup()
+require("config.optional")
 
 vim.opt.relativenumber = false
 vim.opt.cursorlineopt = "number"
