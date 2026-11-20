@@ -37,15 +37,22 @@ return {
           },
         },
         actions = {
-          clear_query = function(picker) picker.input:set("", "") end,
+          delete_to_query_start = function(picker)
+            local input = picker.input.win
+            local col = vim.api.nvim_win_get_cursor(input.win)[2]
+            if col > 0 then
+              vim.api.nvim_buf_set_text(input.buf, 0, 0, 0, col, {})
+              vim.api.nvim_win_set_cursor(input.win, { 1, 0 })
+            end
+          end,
         },
         win = {
           input = {
             keys = {
               ["<c-u>"] = {
-                "clear_query",
+                "delete_to_query_start",
                 mode = { "i", "n" },
-                desc = "Clear query",
+                desc = "Delete to start of query",
               },
             },
           },
@@ -154,11 +161,11 @@ return {
     end,
     keys = {
       { "<leader><leader>", function() require('fff').find_files() end, desc = 'FFFind files' },
-      -- { "fg", function() require('fff').live_grep() end, desc = 'LiFFFe grep' },
+      { "<leader>fz", function() require('fff').live_grep() end, desc = 'LiFFFe grep' },
     },
     opts = {
-      prompt = vim.fn.fnamemodify(vim.fn.getcwd(), ':~') .. '/',
-      layout = { prompt_position = 'top', show_path_first = true },
+      prompt = vim.fn.fnamemodify(vim.fn.getcwd(), ':~') .. package.config:sub(1, 1),
+      layout = { width = 1, height = 1, prompt_position = 'top', show_path_first = true },
       file_picker = { fuzzy_query_highlighting = false },
       keymaps = {
         clear_query = '<C-u>',
@@ -172,5 +179,18 @@ return {
         },
       },
     },
-  }
+  },
+  {
+    "dlyongemallo/diffview-plus.nvim",
+    version = "*",
+    dependencies = {"rickhowe/diffchar.vim"},
+    -- optional: lazy-load on command
+    -- cmd = {
+    --     "DiffviewOpen",
+    --     "DiffviewToggle",
+    --     "DiffviewFileHistory",
+    --     "DiffviewDiffFiles",
+    --     "DiffviewLog",
+    -- },
+  },
 }
