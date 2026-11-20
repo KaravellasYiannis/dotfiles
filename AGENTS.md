@@ -80,9 +80,9 @@ Keep the non-interactive-shell guard and bootstrap ordering intact.
 ### tmux
 
 `home/.config/tmux/tmux.conf` is a tracked copy of Omarchy's defaults with personal
-changes at the bottom, including the `allmux` popup. It does not dynamically
-source the packaged tmux configuration. New upstream defaults therefore require
-review and incorporation; Git tracking does not automatically merge updates.
+changes at the bottom, including the `allmux` and `aimux` popups. It does not
+dynamically source the packaged tmux configuration. New upstream defaults
+therefore require review and incorporation; Git tracking does not merge updates.
 
 Reload with `tmux source-file ~/.config/tmux/tmux.conf` or the default prefix
 followed by `q`. Avoid restarting the tmux server or closing sessions.
@@ -125,9 +125,13 @@ individually into `~/.local/bin`; do not replace the entire directory, which may
 also contain files installed by other applications. This is repo-to-home
 deployment, unlike the configuration import loop.
 
+`./install aimux` builds the executable from the aimux source repository and
+enables its adapters without copying the tracked binary or running `setup.sh`.
+
 OpenCode configuration is intentionally outside this repo. `~/.config/opencode`
 is a real local directory, not a repo symlink. Do not reintroduce it into `FILES`
-or Git unless explicitly requested.
+or Git unless explicitly requested. The aimux installer only adds its terminal
+plugin entry to the existing `cli.json`.
 
 ## Safety and validation
 
@@ -142,4 +146,3 @@ or Git unless explicitly requested.
 - After theme changes, a headless Neovim check can inspect `vim.g.colors_name`;
   avoid broad plugin updates or cleanup just to validate a small config change.
 - Do not commit or push unless requested.
-

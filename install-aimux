@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+source_dir="$(cd -- "${AIMUX_SOURCE:-$HOME/devel/aimux}" && pwd)"
+bin="$HOME/.local/bin"
+mkdir -p "$bin"
+
+build="$(mktemp -d "$bin/.aimux.XXXXXX")"
+stage=
+backup=
+trap '[[ -z $stage ]] || rm -f -- "$stage"; rm -f -- "$build/aimux"; rmdir -- "$build"' EXIT
+
+save_previous() {
+  if [[ -e $1 || -L $1 ]]; then
+    if [[ -z $backup ]]; then
+      mkdir -p "$HOME/.local/state"
+      backup="$(mktemp -d "$HOME/.local/state/dotfiles-backup.XXXXXX")"
+    fi
+    cp -a -- "$1" "$backup/"
+    echo "Backed up $1 to $backup/"
+  fi
+}
+
+update_config() {
+  local target=$1
+  shift
+  if [[ -L $target ]]; then
+    target=$(realpath -e -- "$target")
+  fi
+  mkdir -p "$(dirname -- "$target")"
+  stage=$(mktemp -- "${target}.aimux.XXXXXX")
+  if [[ -e $target ]]; then
+    jq -e "$@" < "$target" > "$stage"
+  else
+    jq -e "$@" <<< '{}' > "$stage"
+  fi
+  if ! cmp -s -- "$stage" "$target"; then
+    save_previous "$target"
+    if [[ -e $target ]]; then
+      chmod --reference="$target" "$stage"
+    fi
+    mv -fT -- "$stage" "$target"
+  else
+    rm -- "$stage"
+  fi
+  stage=
+}
+
+link_adapter() {
+  local source=$1 target=$2
+  if [[ ! -f $source ]]; then
+    echo "Missing adapter: $source" >&2
+    return 1
+  fi
+  if [[ -L $target && $(readlink -- "$target") == "$source" ]]; then
+    return
+  fi
+  if [[ -e $target || -L $target ]]; then
+    echo "Not replacing existing adapter: $target" >&2
+    return 1
+  fi
+  mkdir -p "$(dirname -- "$target")"
+  ln -s -- "$source" "$target"
+}
+
+go build -C "$source_dir" -o "$build/aimux" .
+
+if ! cmp -s "$build/aimux" "$bin/aimux"; then
+  save_previous "$bin/aimux"
+  mv -fT -- "$build/aimux" "$bin/aimux"
+fi
+echo "aimux binary: $bin/aimux"
+
+update_config "${XDG_CONFIG_HOME:-$HOME/.config}/opencode/cli.json" \
+  --arg plugin "$source_dir/integrations/opencode" '
+    .plugins //= []
+    | if any(.plugins[]; . == $plugin or (type == "object" and .package == $plugin))
+      then .
+      else .plugins += [$plugin]
+      end'
+
+copilot_home="${COPILOT_HOME:-$HOME/.copilot}"
+for file in extension.mjs state.mjs; do
+  link_adapter "$source_dir/integrations/copilot/$file" "$copilot_home/extensions/aimux/$file"
+done
+link_adapter "$source_dir/integrations/copilot/aimux.json" "$copilot_home/hooks/aimux.json"

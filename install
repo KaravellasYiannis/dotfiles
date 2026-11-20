@@ -2,6 +2,14 @@
 set -euo pipefail
 
 REPO="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+if [[ $# -gt 0 ]]; then
+  if [[ $# -eq 1 && $1 == aimux ]]; then
+    exec bash "$REPO/install-aimux"
+  fi
+  echo "Usage: ./install [aimux]" >&2
+  exit 2
+fi
+
 FILE=".config/ghostty/shaders/cursor_smear.glsl"
 SOURCE="$REPO/home/$FILE"
 TARGET="$HOME/$FILE"

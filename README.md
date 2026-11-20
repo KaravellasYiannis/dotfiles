@@ -22,3 +22,19 @@ is kept in the repository but is not installed.
 
 Run `./setup.sh` to import live configurations, then `./install` to deploy
 the cursor shader. Neither script installs packages.
+
+## aimux
+
+Run `./install aimux` to build aimux from `~/devel/aimux` (or `$AIMUX_SOURCE`).
+The executable in `~/.local/bin` is built from source, not copied from the
+binary tracked here. The installer requires Go and `jq`, preserves the existing
+OpenCode settings, and backs up changed files under
+`~/.local/state/dotfiles-backup.*`. Reload tmux with `Prefix+q` after installation.
+
+- `Prefix+a`: aimux agent dashboard. `Prefix+f`: the existing `allmux` picker.
+- The tmux tab shows `[directory ▶]` when its active pane is working, `!` when
+  blocked, `✓` for unread output, or `○` when idle. Focusing a pane acknowledges
+  unread output but doesn't clear a pending approval or question.
+- Run OpenCode normally. Codex is not tracked by aimux.
+- Start Copilot as `copilot --experimental` so it loads the aimux extension.
+  Copilot CLI 1.0.114 and Node.js are required for this integration.
