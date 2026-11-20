@@ -12,6 +12,9 @@ vim.opt.softtabstop = 4
 
 vim.opt.listchars = "tab:> ,trail:·,space:·"
 
+vim.opt.conceallevel = 0
+vim.opt.cmdheight = 0
+
 -- Toggle editor chrome.
 vim.g.focus_mode = false
 vim.api.nvim_create_user_command("ToggleFocus", function()
