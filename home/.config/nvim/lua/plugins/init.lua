@@ -21,9 +21,14 @@ return {
         sources = {
           grep = {
             layout = {
-              preset = "vertical",
               reverse = true,
               layout = {
+                box = "vertical",
+                width = 0.9,
+                height = 0.9,
+                border = true,
+                title = "{title} {live} {flags}",
+                title_pos = "center",
                 { win = "preview", title = "{preview}", height = 0.4, border = "bottom" },
                 { win = "list", border = "none" },
                 { win = "input", height = 1, border = "top" },
@@ -150,12 +155,13 @@ return {
     end,
     keys = {
       { "<leader><leader>", function() require('fff').find_files() end, desc = 'FFFind files' },
-      -- { "fg", function() require('fff').live_grep() end, desc = 'LiFFFe grep' },
+      { "<leader>fz", function() require('fff').live_grep() end, desc = 'LiFFFe grep' },
     },
     opts = {
       prompt = vim.fn.fnamemodify(vim.fn.getcwd(), ':~') .. '/',
-      layout = { prompt_position = 'top', show_path_first = true },
-      file_picker = { fuzzy_query_highlighting = false },
+      layout = { prompt_position = 'top', show_path_first = true, height = 0.9, width = 0.9 },
+      file_picker = { fuzzy_query_highlighting = true },
+      hl = { matched = "SnacksPickerMatch", directory_path = "" },
       keymaps = {
         clear_query = '<C-u>',
         preview_scroll_up = '<C-b>',
