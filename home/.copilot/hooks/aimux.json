@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "notification": [
+      {
+        "type": "command",
+        "matcher": "permission_prompt",
+        "bash": "exec node \"${COPILOT_HOME:-$HOME/.copilot}/extensions/aimux/extension.mjs\" --permission-prompt",
+        "timeoutSec": 2
+      }
+    ]
+  }
+}

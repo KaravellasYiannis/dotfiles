@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/v2/cli.json",
+  "theme": {
+    "name": "system"
+  },
+  "session": {
+    "sidebar": "hide",
+    "thinking": "show",
+    "grouping": "auto",
+    "verbosity": "high"
+  },
+  "plugins": [
+    "/home/karavellas/.config/opencode/herdr-opencode",
+    "./aimux-opencode"
+  ],
+  "tabs": {
+    "layout": "vertical"
+  }
+}

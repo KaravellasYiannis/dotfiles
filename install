@@ -3,10 +3,7 @@ set -euo pipefail
 
 REPO="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 if [[ $# -gt 0 ]]; then
-  if [[ $# -eq 1 && $1 == aimux ]]; then
-    exec bash "$REPO/install-aimux"
-  fi
-  echo "Usage: ./install [aimux]" >&2
+  echo "Usage: ./install" >&2
   exit 2
 fi
 

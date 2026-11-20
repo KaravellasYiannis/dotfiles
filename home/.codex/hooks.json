@@ -1,0 +1,40 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "command": "bash '/home/karavellas/.codex/herdr-agent-state.sh' session",
+            "timeout": 10,
+            "type": "command"
+          }
+        ]
+      },
+      {
+        "matcher": "^(startup|resume|clear|fork)$",
+        "hooks": [{ "type": "command", "command": "\"$HOME/.local/bin/aimux\" set idle", "timeout": 2 }]
+      }
+    ],
+    "UserPromptSubmit": [
+      { "hooks": [{ "type": "command", "command": "\"$HOME/.local/bin/aimux\" set working", "timeout": 2 }] }
+    ],
+    "PreToolUse": [
+      { "hooks": [{ "type": "command", "command": "\"$HOME/.local/bin/aimux\" set working", "timeout": 2 }] }
+    ],
+    "PermissionRequest": [
+      { "hooks": [{ "type": "command", "command": "\"$HOME/.local/bin/aimux\" set blocked", "timeout": 2 }] }
+    ],
+    "PostToolUse": [
+      { "hooks": [{ "type": "command", "command": "\"$HOME/.local/bin/aimux\" set working", "timeout": 2 }] }
+    ],
+    "Stop": [
+      { "hooks": [{ "type": "command", "command": "\"$HOME/.local/bin/aimux\" set done && printf '{}\\n'", "timeout": 2 }] }
+    ],
+    "Interrupt": [
+      { "hooks": [{ "type": "command", "command": "\"$HOME/.local/bin/aimux\" set done", "timeout": 2 }] }
+    ],
+    "SessionEnd": [
+      { "hooks": [{ "type": "command", "command": "\"$HOME/.local/bin/aimux\" clear", "timeout": 2 }] }
+    ]
+  }
+}

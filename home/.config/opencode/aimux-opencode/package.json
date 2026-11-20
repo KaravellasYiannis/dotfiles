@@ -1,0 +1,8 @@
+{
+  "name": "aimux-opencode",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./tui": "./tui.js"
+  }
+}

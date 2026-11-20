@@ -125,13 +125,9 @@ individually into `~/.local/bin`; do not replace the entire directory, which may
 also contain files installed by other applications. This is repo-to-home
 deployment, unlike the configuration import loop.
 
-`./install aimux` builds the executable from the aimux source repository and
-enables its adapters without copying the tracked binary or running `setup.sh`.
-
-OpenCode configuration is intentionally outside this repo. `~/.config/opencode`
-is a real local directory, not a repo symlink. Do not reintroduce it into `FILES`
-or Git unless explicitly requested. The aimux installer only adds its terminal
-plugin entry to the existing `cli.json`.
+The Aimux registration files and runtime adapters for OpenCode, Copilot, and
+Codex are tracked for manual linking. Do not add their full config directories
+to `FILES` or track other OpenCode configuration.
 
 ## Safety and validation
 
