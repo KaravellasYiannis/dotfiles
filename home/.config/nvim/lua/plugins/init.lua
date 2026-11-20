@@ -118,6 +118,7 @@ return {
     },
     dependencies = { "esmuellert/codediff.nvim", "folke/snacks.nvim" },
     opts = {
+      auto_close_console = false,
       integrations = { codediff = true, snacks = true },
     },
   },
