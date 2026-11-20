@@ -20,6 +20,21 @@ local bindings = {
 
 -- Workspace servers start headless and can later be attached to either frontend.
 local mapped = false
+local windows = vim.fn.has("win32") == 1
+
+local function update_title_background()
+  local normal = vim.api.nvim_get_hl(0, { name = "Normal", link = false })
+  vim.g.neovide_title_background_color = normal.bg and ("#%06x"):format(normal.bg) or nil
+end
+
+vim.api.nvim_create_autocmd("ColorScheme", {
+  callback = function()
+    if mapped and windows then
+      update_title_background()
+    end
+  end,
+})
+
 vim.api.nvim_create_autocmd({ "UIEnter", "UILeave" }, {
   callback = function()
     -- Inspect attached clients because g:neovide can outlive the GUI connection.
@@ -31,6 +46,13 @@ vim.api.nvim_create_autocmd({ "UIEnter", "UILeave" }, {
       return
     end
     mapped = attached
+
+    if attached and windows then
+      vim.o.titlestring = "%{getcwd(-1)}"
+      vim.o.titlelen = 0
+      vim.o.title = true
+      update_title_background()
+    end
 
     if attached and vim.o.guifont == "" then
       vim.o.guifont = vim.fn.has("win32") == 1 and "CaskaydiaCove NF:h14" or "monospace:h14"
