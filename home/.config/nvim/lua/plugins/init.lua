@@ -19,11 +19,16 @@ return {
       dashboard = { enabled = false },
       picker = {
         sources = {
+          files = {
+            layout = { fullscreen = true },
+          },
           grep = {
             layout = {
               preset = "vertical",
+              fullscreen = true,
               reverse = true,
               layout = {
+                box = "vertical",
                 { win = "preview", title = "{preview}", height = 0.4, border = "bottom" },
                 { win = "list", border = "none" },
                 { win = "input", height = 1, border = "top" },
@@ -141,7 +146,6 @@ return {
     opts = {},
   },
   { "ej-shafran/compile-mode.nvim" },
-  { dir = "~/devel/dolores.nvim/" },
   {
     'dmtrKovalenko/fff',
     build = function()
