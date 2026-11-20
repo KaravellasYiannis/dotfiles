@@ -13,7 +13,12 @@ vim.keymap.set("n", "<leader>t", function()
     end
   end
   vim.cmd.tabnew()
-  vim.cmd.terminal()
+  if vim.fn.has("win32") == 1 then
+    local shell = vim.fn.executable("pwsh.exe") == 1 and "pwsh.exe" or "powershell.exe"
+    vim.fn.jobstart({ shell, "-NoLogo" }, { term = true })
+  else
+    vim.cmd.terminal()
+  end
   vim.cmd.startinsert()
 end, { desc = "Terminal tab" })
 
