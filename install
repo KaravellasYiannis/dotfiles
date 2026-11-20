@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REPO="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+FILE=".config/ghostty/shaders/cursor_smear.glsl"
+SOURCE="$REPO/home/$FILE"
+TARGET="$HOME/$FILE"
+
+if [[ ! -f "$SOURCE" ]]; then
+  echo "Missing shader: $SOURCE" >&2
+  exit 1
+fi
+
+if [[ -L "$TARGET" && "$(readlink -- "$TARGET")" == "$SOURCE" ]]; then
+  echo "Already linked: $FILE"
+  exit 0
+fi
+
+if [[ -e "$TARGET" || -L "$TARGET" ]]; then
+  mkdir -p "$HOME/.local/state"
+  BACKUP="$(mktemp -d "$HOME/.local/state/dotfiles-backup.XXXXXX")"
+  mkdir -p "$BACKUP/home/$(dirname "$FILE")"
+  mv -- "$TARGET" "$BACKUP/home/$FILE"
+  echo "Backups: $BACKUP"
+fi
+
+mkdir -p "$(dirname "$TARGET")"
+ln -s -- "$SOURCE" "$TARGET"
+echo "Linked: $FILE"

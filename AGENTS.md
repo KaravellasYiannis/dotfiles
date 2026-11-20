@@ -10,6 +10,8 @@ Keep it simple. Do not recreate the old standalone desktop setup, add a dotfile
 framework, or introduce layers of configuration just to avoid tracking whole
 files. Prefer Omarchy defaults and a few deliberate personal changes.
 
+Never add test files in this repo, if you want to test anything write the test file under /tmp
+
 ## Layout and symlink direction
 
 `home/` mirrors paths relative to `$HOME`. Actual configuration contents live
@@ -53,6 +55,14 @@ The old Stow/package installer instructions still present in `README.md` are
 legacy instructions, not the workflow for this branch.
 
 ## Configuration ownership
+
+### Ghostty
+
+`home/.config/ghostty/config` is imported by `setup.sh`; its live path points
+back to this repo. Preserve Omarchy's dynamic theme include.
+`./install` deploys only `home/.config/ghostty/shaders/cursor_smear.glsl` by
+linking its live path to the repo, backing up any existing file. The adjacent
+shader license stays in the repo and is not deployed.
 
 ### Bash
 
