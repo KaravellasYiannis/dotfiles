@@ -175,5 +175,6 @@ return {
         },
       },
     },
-  }
+  },
+  { "karavellasyiannis/go-live-markdown.nvim"},
 }
