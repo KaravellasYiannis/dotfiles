@@ -6,6 +6,8 @@
 vim.keymap.del({ "n", "i", "v" }, "<A-j>")
 vim.keymap.del({ "n", "i", "v" }, "<A-k>")
 
+vim.keymap.set("i", "<C-s>", vim.lsp.buf.signature_help, { desc = "Signature Help" })
+
 vim.keymap.set("n", "<leader>cc", function()
   if type(vim.g.compile_command) == "string" and vim.g.compile_command ~= "" then
     vim.cmd.Recompile()
