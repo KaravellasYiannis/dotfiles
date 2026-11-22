@@ -73,6 +73,31 @@ return {
     },
   },
   { "akinsho/bufferline.nvim", enabled = false },
+  {
+    "nvim-lualine/lualine.nvim",
+    opts = function(_, opts)
+      local sections = opts.sections
+      -- shortcut: use the pinned LazyVim section order; recheck if an update or extra changes it.
+      local profiler, noice_command, noice_mode, debugger, _, diff = unpack(sections.lualine_x)
+      local diagnostics = sections.lualine_c[2]
+      local path = { LazyVim.lualine.pretty_path({ modified_sign = " [+]" }) }
+
+      sections.lualine_a = { { "mode", fmt = function(mode) return mode:sub(1, 1) end } }
+      sections.lualine_b = { { "branch", icon = "" } }
+      -- Keep the breadcrumbs LazyVim appends after its four base components.
+      sections.lualine_c = vim.list_extend({ path, diff }, sections.lualine_c, 5)
+      sections.lualine_x = {
+        noice_command,
+        { "fileformat", symbols = { unix = "UNIX", dos = "CRLF", mac = "CR" } },
+        "lsp_status",
+        diagnostics,
+        profiler,
+        noice_mode,
+        debugger,
+      }
+      sections.lualine_z = {}
+    end,
+  },
   { "folke/flash.nvim", enabled = false },
   {
     "folke/noice.nvim",
