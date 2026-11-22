@@ -105,14 +105,21 @@ function write(status) {
   });
 }
 
+function parentOf(pid) {
+  try {
+    return Number(readFileSync(`/proc/${pid}/status`, "utf8").match(/^PPid:\s+(\d+)$/m)?.[1]);
+  } catch {}
+}
+
 async function observe() {
   const { joinSession } = await import("@microsoft/copilot-sdk/extension");
   if (!inPane) return joinSession();
 
-  let server, observer, promptWaiting, closed, bufferedStatus;
+  let server, observer, promptWaiting, closed, bufferedStatus, watchdog;
   const close = () => {
     if (closed) return;
     closed = true;
+    clearInterval(watchdog);
     observer?.close();
     // Keep the pane lease until clear finishes, even when /clear starts a new session.
     server?.close();
@@ -121,6 +128,15 @@ async function observe() {
   process.once("exit", close);
   for (const signal of ["SIGTERM", "SIGINT", "SIGHUP"]) {
     process.once(signal, () => process.exit(0));
+  }
+
+  // On Linux the npm launcher can be killed while its runtime and extension survive.
+  const runtime = process.ppid;
+  const launcher = parentOf(runtime);
+  if (launcher) {
+    watchdog = setInterval(() => {
+      if (process.ppid !== runtime || parentOf(runtime) !== launcher) process.exit(0);
+    }, 250).unref();
   }
 
   void claimPane(() => {
@@ -137,6 +153,7 @@ async function observe() {
   observer = follow(session, status => {
     if (server) write(status);
     else bufferedStatus = status;
+    if (status === "clear") close();
   });
   if (promptWaiting) void observer.permissionPrompt();
 }
