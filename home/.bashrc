@@ -15,6 +15,7 @@ source "$OMARCHY_PATH/default/bash/rc"
 alias vim='nvim'
 alias ll='ls -l'
 alias tmuxx='tmux attach -t karavellas || tmux new -s karavellas'
+alias oc='opencode'
 
 EDITOR=nvim
 

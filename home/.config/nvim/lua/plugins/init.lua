@@ -155,6 +155,8 @@ return {
             },
         },
     },
+    { "dlyongemallo/diffview-plus.nvim", },
+
     { "dlyongemallo/diffview-plus.nvim" },
     { "nvim-mini/mini.pairs", enabled = false },
     { "folke/todo-comments.nvim", enabled = false },
