@@ -158,6 +158,16 @@ return {
     { "dlyongemallo/diffview-plus.nvim", },
 
     { "dlyongemallo/diffview-plus.nvim" },
+    {
+        "neanias/everforest-nvim",
+        main = "everforest",
+        opts = {
+            on_highlights = function(groups, palette)
+                -- Tint changed characters without replacing their syntax colors.
+                groups.DiffText = { bg = require("everforest.colour_utility").blend(palette.blue, 0.20, palette.bg_blue) }
+            end,
+        },
+    },
     { "nvim-mini/mini.pairs", enabled = false },
     { "folke/todo-comments.nvim", enabled = false },
     {
