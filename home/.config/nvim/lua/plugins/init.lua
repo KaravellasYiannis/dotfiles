@@ -165,6 +165,7 @@ return {
             on_highlights = function(groups, palette)
                 -- Tint changed characters without replacing their syntax colors.
                 groups.DiffText = { bg = require("everforest.colour_utility").blend(palette.blue, 0.20, palette.bg_blue) }
+                groups.TSParameter = { fg = palette.fg, italic = true }
             end,
         },
     },
