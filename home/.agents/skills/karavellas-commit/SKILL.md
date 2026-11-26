@@ -58,11 +58,11 @@ feat(scope): brief title
 - Always include a concise scope identifying the affected component.
 - Keep the title brief, imperative, and without a trailing period.
 - Include a brief body using `- ` bullets. Describe meaningful changes and
-  reasons, not a file-by-file transcript. One bullet is sufficient when apt.
+  reasons, not a file-by-file transcript.
+- On small routine changes, just a title should be sufficient.
 - Do not claim checks passed unless they actually ran successfully.
 - Don't mention any ran test or unnecessary information in the commit message
-- Your brief details on the commit message, should actually be brief
-- Don't force a second point, in many cases just one point is enough.
+- Your brief details on the commit message, should actually be brief (if applicable)
 - Be VERY brief in each one of your points.
 
 ## Commit and report
@@ -71,6 +71,6 @@ feat(scope): brief title
    hunks. Do not amend, rewrite history, bypass hooks, or change Git identity.
 2. If a hook fails, stop and report it; do not bypass the hook.
 3. Check Git status afterward and confirm unrelated changes are preserved.
-4. Report the commit hash and title, checks run, and any remaining changes.
+4. Report the commit hash and full commit message, checks run, and any remaining changes.
 5. NEVER PUSH. Do not run `git push` or any equivalent operation that uploads
    commits, pushes tags, or publishes repository changes, unless specifically asked
