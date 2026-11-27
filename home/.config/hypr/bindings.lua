@@ -42,7 +42,6 @@ hl.unbind("SUPER + S")
 hl.unbind("SUPER + ALT + SPACE")
 o.bind("SUPER + S", "Apps menu", "omarchy-menu toggle apps")
 
-hl.unbind("SUPER + W")
 o.bind("ALT + F4", "Close window", hl.dsp.window.close())
 
 -- SUPER+V previously performed universal paste; use it for clipboard history.
