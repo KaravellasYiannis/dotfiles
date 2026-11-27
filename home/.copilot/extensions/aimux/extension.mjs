@@ -10,13 +10,13 @@ import { follow } from "./state.mjs";
 const { TMUX, TMUX_PANE, SESSION_ID, AIMUX_BIN } = process.env;
 const inPane = Boolean(TMUX && /^%\d+$/.test(TMUX_PANE ?? ""));
 
-function socketPath() {
+function socketPath(sessionId) {
   const uid = process.getuid();
   const dir = join(tmpdir(), `aimux-copilot-${uid}`);
   mkdirSync(dir, { recursive: true, mode: 0o700 });
   const stat = lstatSync(dir);
   if (!stat.isDirectory() || stat.uid !== uid || (stat.mode & 0o077)) return;
-  const key = createHash("sha256").update(JSON.stringify([TMUX, TMUX_PANE]));
+  const key = createHash("sha256").update(JSON.stringify([TMUX, TMUX_PANE, sessionId]));
   const path = join(dir, `${key.digest("hex").slice(0, 20)}.sock`);
   if (Buffer.byteLength(path) < 104) return path;
 }
@@ -36,14 +36,13 @@ function contact(path, sessionId = "") {
   });
 }
 
-async function notify() {
+async function notifySession() {
   const { sessionId, notification_type } = JSON.parse(readFileSync(0, "utf8"));
   if (notification_type !== "permission_prompt" || typeof sessionId !== "string" ||
       !sessionId || sessionId.length > 128) return;
-  const path = socketPath();
+  const path = socketPath(sessionId);
   if (!path) return;
 
-  // The hook can run while the extension is still starting or switching sessions.
   const deadline = Date.now() + 1500;
   while (Date.now() < deadline) {
     if (await contact(path, sessionId) === "accepted") return;
@@ -51,10 +50,9 @@ async function notify() {
   }
 }
 
-async function claimPane(onPrompt, isClosed) {
-  const path = socketPath();
+async function claimSession(onPrompt, isClosed) {
+  const path = socketPath(SESSION_ID);
   if (!path) return;
-  // shortcut: one Copilot session owns the pane; aggregate if sidebar sessions need sharing.
   const deadline = Date.now() + 2000;
   while (!isClosed() && Date.now() < deadline) {
     const server = createServer({ allowHalfOpen: true }, socket => {
@@ -97,25 +95,44 @@ async function claimPane(onPrompt, isClosed) {
 }
 
 function write(status) {
-  // Complete each write before starting the next (including the final clear).
-  spawnSync(AIMUX_BIN || "aimux", status === "clear" ? ["clear"] : ["set", status], {
-    stdio: "ignore",
+  const { status: code, error, stderr } = spawnSync(AIMUX_BIN || "aimux", ["session", SESSION_ID, status], {
+    stdio: ["ignore", "ignore", "pipe"],
+    encoding: "utf8",
     timeout: 500,
     killSignal: "SIGKILL",
   });
+  if (code !== 0) return error?.message || stderr?.trim() || `exit status ${code}`;
+}
+
+function parentOf(pid) {
+  try {
+    return Number(readFileSync(`/proc/${pid}/status`, "utf8").match(/^PPid:\s+(\d+)$/m)?.[1]);
+  } catch {}
 }
 
 async function observe() {
   const { joinSession } = await import("@microsoft/copilot-sdk/extension");
-  if (!inPane) return joinSession();
+  if (!inPane || !SESSION_ID || SESSION_ID.length > 128) return joinSession();
 
-  let server, observer, promptWaiting, closed, bufferedStatus;
+  let lease, observer, promptWaiting, closed, desired, retry, watchdog;
+  const publish = () => {
+    if (!lease || !desired || closed) return;
+    const failure = write(desired);
+    if (failure && !retry) console.error(`aimux: status update failed; retrying: ${failure}`);
+    clearTimeout(retry);
+    retry = failure ? setTimeout(publish, 500).unref() : undefined;
+  };
   const close = () => {
     if (closed) return;
     closed = true;
-    observer?.close();
-    // Keep the pane lease until clear finishes, even when /clear starts a new session.
-    server?.close();
+    clearInterval(watchdog);
+    clearTimeout(retry);
+    if (observer) {
+      observer.stop();
+      const failure = lease && write("clear");
+      if (failure) console.error(`aimux: could not clear session status: ${failure}`);
+    }
+    lease?.close();
   };
   process.once("disconnect", close);
   process.once("exit", close);
@@ -123,26 +140,35 @@ async function observe() {
     process.once(signal, () => process.exit(0));
   }
 
-  void claimPane(() => {
+  // On Linux the npm launcher can be killed while its runtime and extension survive.
+  const runtime = process.ppid;
+  const launcher = parentOf(runtime);
+  if (launcher) {
+    watchdog = setInterval(() => {
+      if (process.ppid !== runtime || parentOf(runtime) !== launcher) process.exit(0);
+    }, 250).unref();
+  }
+
+  void claimSession(() => {
     if (observer) void observer.permissionPrompt();
     else promptWaiting = true;
-  }, () => closed).then(lease => {
-    if (closed) return lease?.close();
-    server = lease;
-    if (server && bufferedStatus) write(bufferedStatus);
+  }, () => closed).then(claimed => {
+    if (closed) return claimed?.close();
+    lease = claimed;
+    publish();
   }).catch(() => {});
 
   const session = await joinSession();
   if (closed) return;
   observer = follow(session, status => {
-    if (server) write(status);
-    else bufferedStatus = status;
-  });
+    desired = status;
+    publish();
+  }, close);
   if (promptWaiting) void observer.permissionPrompt();
 }
 
 if (process.argv[2] === "--permission-prompt") {
-  if (inPane) await notify().catch(() => {});
+  if (inPane) await notifySession().catch(() => {});
 } else {
   await observe();
 }

@@ -1,4 +1,4 @@
-export function follow(session, write) {
+export function follow(session, write, onShutdown) {
   let phase = "idle";
   let published, closed;
   let permissions = new Set();
@@ -13,11 +13,10 @@ export function follow(session, write) {
     }
   }
 
-  function close() {
+  function stop() {
     if (closed) return;
     closed = true;
     unsubscribe();
-    write("clear");
   }
 
   async function permissionPrompt() {
@@ -31,7 +30,6 @@ export function follow(session, write) {
       completedDuringRead = new Set();
       try {
         // The CLI's notification confirms a real dialog but contains no request ID.
-        // Query only pending prompts, not the transcript or the pre-evaluation permission hook.
         const { items } = await session.rpc.permissions.pendingRequests();
         if (!closed) {
           permissions = new Set(items.map(item => item.requestId)
@@ -60,7 +58,7 @@ export function follow(session, write) {
         if (!agentId && phase === "working") phase = "done";
         break;
       case "session.shutdown":
-        close();
+        onShutdown();
         return;
       case "permission.completed":
         completedDuringRead?.add(id);
@@ -83,5 +81,5 @@ export function follow(session, write) {
   });
 
   publish();
-  return { permissionPrompt, close };
+  return { permissionPrompt, stop };
 }
